@@ -4,7 +4,10 @@ Copyright © 2024 NAME HERE <EMAIL ADDRESS>
 package cmd
 
 import (
+	"bufio"
+	"fmt"
 	"os"
+	"strings"
 
 	"github.com/sdhungan/toolbox/cmd/info"
 	"github.com/sdhungan/toolbox/cmd/net"
@@ -26,6 +29,7 @@ toolbox info [-h] - for information commands
 	// Uncomment the following line if your bare application
 	// has an action associated with it:
 	// Run: func(cmd *cobra.Command, args []string) { },
+
 }
 
 // Execute adds all child commands to the root command and sets flags appropriately.
@@ -45,15 +49,46 @@ func addSubCommandPallets() {
 }
 
 func init() {
-	// Here you will define your flags and configuration settings.
-	// Cobra supports persistent flags, which, if defined here,
-	// will be global for your application.
-
-	// rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is $HOME/.toolbox.yaml)")
-
-	// Cobra also supports local flags, which will only run
-	// when this action is called directly.
-	rootCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
 	addSubCommandPallets()
 
+	// Assign the Run function after rootCmd is declared to avoid initialization cycle
+	rootCmd.Run = func(cmd *cobra.Command, args []string) {
+		fmt.Println("Welcome to the Toolbox interactive mode!")
+		fmt.Println("Type '\x1b[33mhelp\x1b[0m' to see the list of commands or '\x1b[33mexit\x1b[0m' to quit the CLI")
+		startInteractiveMode()
+	}
+}
+
+func startInteractiveMode() {
+	// For the interactive mode we read in the input of the user using bufio.Scanner
+	scanner := bufio.NewScanner(os.Stdin)
+	for {
+		// Infinite loop to keep the interactive mode running and waiting for user input
+		fmt.Print("toolbox> ")
+
+		// Scan the input from the user untill the user presses enter
+		if !scanner.Scan() {
+			break
+		}
+
+		input := strings.TrimSpace(scanner.Text()) // remove leading and trailing spaces
+
+		if input == "" { // User presses enter without input text
+			continue
+		}
+
+		if input == "exit" || input == "quit" { // User wants to exit the CLI
+			println("Exiting the toolbox CLI...")
+			break // Break infinite loop to exit the CLI
+		}
+
+		// If the user input is not empty and not exit, then we will execute the command
+		args := strings.Split(input, " ") // Split the input into command and arguments by spaces
+		rootCmd.SetArgs(args)             // Set the arguments for the root command as if the user typed them in the terminal
+
+		if err := rootCmd.Execute(); err != nil {
+			fmt.Printf("Error: %s \n", err)
+		}
+
+	}
 }
