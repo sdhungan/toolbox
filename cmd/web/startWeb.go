@@ -121,4 +121,5 @@ var startWebServerCmd = &cobra.Command{
 
 func init() {
 	WebCmd.AddCommand(startWebCmd)
+	WebCmd.AddCommand(startWebServerCmd)
 }
