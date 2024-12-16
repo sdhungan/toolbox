@@ -7,6 +7,8 @@ import (
 	"bufio"
 	"fmt"
 	"os"
+	"os/exec"
+	"runtime"
 	"strings"
 
 	"github.com/sdhungan/toolbox/cmd/info"
@@ -41,11 +43,22 @@ func Execute() {
 	}
 }
 
-func addSubCommandPallets() {
-	rootCmd.AddCommand(net.NetCmd)
-	rootCmd.AddCommand(info.InfoCmd)
-	rootCmd.AddCommand(web.WebCmd)
-
+var clearCmd = &cobra.Command{
+	Use:   "clear",
+	Short: "Clears the terminal screen",
+	Long:  "Clears the terminal screen to make it easier to work with the CLI tool.",
+	Run: func(cmd *cobra.Command, args []string) {
+		switch runtime.GOOS {
+		case "windows":
+			cmd := exec.Command("cmd", "/c", "cls")
+			cmd.Stdout = os.Stdout
+			cmd.Run()
+		default: // Unix-based systems
+			cmd := exec.Command("clear")
+			cmd.Stdout = os.Stdout
+			cmd.Run()
+		}
+	},
 }
 
 func init() {
@@ -55,6 +68,7 @@ func init() {
 	rootCmd.Run = func(cmd *cobra.Command, args []string) {
 		fmt.Println("Welcome to the Toolbox interactive mode!")
 		fmt.Println("Type '\x1b[33mhelp\x1b[0m' to see the list of commands or '\x1b[33mexit\x1b[0m' to quit the CLI")
+		cmd.Help()
 		startInteractiveMode()
 	}
 }
@@ -91,4 +105,13 @@ func startInteractiveMode() {
 		}
 
 	}
+}
+
+func addSubCommandPallets() {
+	rootCmd.AddCommand(net.NetCmd)
+	rootCmd.AddCommand(info.InfoCmd)
+	rootCmd.AddCommand(web.WebCmd)
+	rootCmd.AddCommand(clearCmd)
+	rootCmd.CompletionOptions.DisableDefaultCmd = true
+
 }

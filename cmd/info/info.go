@@ -10,7 +10,7 @@ import (
 // infoCmd represents the info command
 var InfoCmd = &cobra.Command{
 	Use:   "info",
-	Short: "All things information",
+	Short: "Pallet that contains information based commands",
 	Long:  ``,
 	Run: func(cmd *cobra.Command, args []string) {
 		cmd.Help()

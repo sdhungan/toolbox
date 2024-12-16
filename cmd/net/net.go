@@ -10,7 +10,7 @@ import (
 // NetCmd represents the net command
 var NetCmd = &cobra.Command{
 	Use:   "net",
-	Short: "Net is a pallet that contains network based commands",
+	Short: "Pallet that contains network based commands",
 	Long:  ``,
 	Run: func(cmd *cobra.Command, args []string) {
 		cmd.Help()
