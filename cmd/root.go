@@ -10,11 +10,13 @@ import (
 	"os/exec"
 	"runtime"
 	"strings"
+	"time"
 
 	"github.com/sdhungan/toolbox/cmd/info"
 	"github.com/sdhungan/toolbox/cmd/net"
 	"github.com/sdhungan/toolbox/cmd/web"
 	"github.com/spf13/cobra"
+	"go.uber.org/zap"
 )
 
 // rootCmd represents the base command when called without any subcommands
@@ -66,6 +68,10 @@ func init() {
 
 	// Assign the Run function after rootCmd is declared to avoid initialization cycle
 	rootCmd.Run = func(cmd *cobra.Command, args []string) {
+		logger, _ := zap.NewDevelopment()
+		defer logger.Sync()
+
+		logger.Info("Interactive mode started at Time: " + time.Now().String())
 		fmt.Println("Welcome to the Toolbox interactive mode!")
 		fmt.Println("Type '\x1b[33mhelp\x1b[0m' to see the list of commands or '\x1b[33mexit\x1b[0m' to quit the CLI")
 		cmd.Help()
