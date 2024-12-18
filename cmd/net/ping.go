@@ -50,7 +50,7 @@ var pingCmd = &cobra.Command{
 		if err != nil {
 			fmt.Println("Error: ", err)
 		} else {
-			fmt.Printf("Respons of %v: %v", urlPath, resp)
+			fmt.Printf("Respons of %v: %v \n", urlPath, resp)
 		}
 
 	},

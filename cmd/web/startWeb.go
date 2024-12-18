@@ -5,15 +5,15 @@ package web
 
 import (
 	"fmt"
+	"github.com/sdhungan/toolbox/logger"
+	"github.com/spf13/cobra"
+	"go.uber.org/zap"
 	"html/template"
 	"net/http"
 	"os"
 	"os/exec"
 	"path/filepath"
 	"runtime"
-	"time"
-
-	"github.com/spf13/cobra"
 )
 
 type Film struct {
@@ -27,7 +27,8 @@ var startWebCmd = &cobra.Command{
 	Long:  ``,
 	Run: func(cmd *cobra.Command, args []string) {
 		fmt.Println("Launching the web server in a new terminal window...")
-
+		log := logger.GetLogger()
+		log.Info("Launch web server using new terminal.")
 		// Define the command to launch a new terminal and run the web server
 		var terminalCommand *exec.Cmd
 
@@ -60,6 +61,7 @@ var startWebServerCmd = &cobra.Command{
 	Short: "Stars a web server on port 8080 in a new ",
 	Long:  ``,
 	Run: func(cmd *cobra.Command, args []string) {
+		log := logger.GetLogger()
 
 		fmt.Println("Server is running on port 8080")
 		exePath, err := os.Executable()
@@ -73,7 +75,7 @@ var startWebServerCmd = &cobra.Command{
 
 		h1 := func(w http.ResponseWriter, r *http.Request) {
 			// Handles GET requests to the server on root URL (defined with http.HandleFunc("/", h1))
-
+			log.Info("HTTP GET request made on URL: " + r.URL.Path)
 			tmpl := template.Must(template.ParseFiles(indexHtmlPath))
 
 			films := map[string][]Film{
@@ -86,10 +88,6 @@ var startWebServerCmd = &cobra.Command{
 				},
 			}
 
-			fmt.Printf("[INFO] %s request received at %s - URL: %s\n",
-				r.Method, time.Now().Format(time.RFC3339), r.URL.Path,
-			)
-
 			tmpl.Execute(w, films)
 
 		}
@@ -99,10 +97,7 @@ var startWebServerCmd = &cobra.Command{
 			title := r.PostFormValue("title")
 			director := r.PostFormValue("director")
 
-			fmt.Printf("[INFO] POST request received at %s -  URL: %s - New Film: Title: %s, Director: %s \n",
-				time.Now().Format(time.RFC3339), r.URL.Path, title, director,
-			)
-
+			log.Info("POST request received at URL: " + r.URL.Path)
 			tmpl := template.Must(template.ParseFiles(indexHtmlPath))
 			tmpl.ExecuteTemplate(w, "film-list-element", Film{Title: title, Director: director})
 		}
@@ -111,9 +106,10 @@ var startWebServerCmd = &cobra.Command{
 		http.HandleFunc("/", h1)
 		http.HandleFunc("/add-film/", h2)
 
+		log.Info("Webservice started on localhost:8080")
 		err = http.ListenAndServe("localhost:8080", nil)
 		if err != nil {
-			fmt.Println("Failed to start server caused by ", err)
+			log.Error("Error when opening localhost:8080 with: - ", zap.Error(err))
 		}
 
 	},

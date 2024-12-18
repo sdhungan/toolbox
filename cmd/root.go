@@ -6,18 +6,19 @@ package cmd
 import (
 	"bufio"
 	"fmt"
+	"github.com/sdhungan/toolbox/cmd/info"
+	"github.com/sdhungan/toolbox/cmd/net"
+	"github.com/sdhungan/toolbox/cmd/web"
+	"github.com/sdhungan/toolbox/logger"
+	"github.com/spf13/cobra"
+	"go.uber.org/zap"
 	"os"
 	"os/exec"
 	"runtime"
 	"strings"
-	"time"
-
-	"github.com/sdhungan/toolbox/cmd/info"
-	"github.com/sdhungan/toolbox/cmd/net"
-	"github.com/sdhungan/toolbox/cmd/web"
-	"github.com/spf13/cobra"
-	"go.uber.org/zap"
 )
+
+var log *zap.Logger
 
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
@@ -39,8 +40,10 @@ toolbox info [-h] - for information commands
 // Execute adds all child commands to the root command and sets flags appropriately.
 // This is called by main.main(). It only needs to happen once to the rootCmd.
 func Execute() {
+
 	err := rootCmd.Execute()
 	if err != nil {
+		log.Error("Command execute failed", zap.Error(err))
 		os.Exit(1)
 	}
 }
@@ -65,16 +68,16 @@ var clearCmd = &cobra.Command{
 
 func init() {
 	addSubCommandPallets()
+	log = logger.GetLogger()
 
 	// Assign the Run function after rootCmd is declared to avoid initialization cycle
 	rootCmd.Run = func(cmd *cobra.Command, args []string) {
-		logger, _ := zap.NewDevelopment()
-		defer logger.Sync()
 
-		logger.Info("Interactive mode started at Time: " + time.Now().String())
+		log.Info("Interactive mode started...")
 		fmt.Println("Welcome to the Toolbox interactive mode!")
 		fmt.Println("Type '\x1b[33mhelp\x1b[0m' to see the list of commands or '\x1b[33mexit\x1b[0m' to quit the CLI")
 		cmd.Help()
+
 		startInteractiveMode()
 	}
 }
@@ -84,9 +87,9 @@ func startInteractiveMode() {
 	scanner := bufio.NewScanner(os.Stdin)
 	for {
 		// Infinite loop to keep the interactive mode running and waiting for user input
-		fmt.Print("toolbox> ")
+		fmt.Print("\n \n toolbox> ")
 
-		// Scan the input from the user untill the user presses enter
+		// Scan the input from the user until the user presses enter
 		if !scanner.Scan() {
 			break
 		}
@@ -98,7 +101,7 @@ func startInteractiveMode() {
 		}
 
 		if input == "exit" || input == "quit" { // User wants to exit the CLI
-			println("Exiting the toolbox CLI...")
+			log.Info("Exiting the toolbox CLI")
 			break // Break infinite loop to exit the CLI
 		}
 
@@ -107,7 +110,7 @@ func startInteractiveMode() {
 		rootCmd.SetArgs(args)             // Set the arguments for the root command as if the user typed them in the terminal
 
 		if err := rootCmd.Execute(); err != nil {
-			fmt.Printf("Error: %s \n", err)
+			log.Error("Command execute failed: ", zap.Error(err))
 		}
 
 	}
