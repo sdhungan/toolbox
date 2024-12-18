@@ -6,6 +6,7 @@ package cmd
 import (
 	"bufio"
 	"fmt"
+	"github.com/sdhungan/toolbox/cmd/ilias"
 	"github.com/sdhungan/toolbox/cmd/info"
 	"github.com/sdhungan/toolbox/cmd/net"
 	"github.com/sdhungan/toolbox/cmd/web"
@@ -87,7 +88,7 @@ func startInteractiveMode() {
 	scanner := bufio.NewScanner(os.Stdin)
 	for {
 		// Infinite loop to keep the interactive mode running and waiting for user input
-		fmt.Print("\n \n toolbox> ")
+		fmt.Print("\ntoolbox> ")
 
 		// Scan the input from the user until the user presses enter
 		if !scanner.Scan() {
@@ -121,6 +122,7 @@ func addSubCommandPallets() {
 	rootCmd.AddCommand(info.InfoCmd)
 	rootCmd.AddCommand(web.WebCmd)
 	rootCmd.AddCommand(clearCmd)
+	rootCmd.AddCommand((ilias.HclTempCmd))
 	rootCmd.CompletionOptions.DisableDefaultCmd = true
 
 }

@@ -22,8 +22,8 @@ type Film struct {
 }
 
 var startWebCmd = &cobra.Command{
-	Use:   "startWeb",
-	Short: "Starts a web server on port 8080 in a new terminal",
+	Use:   "startHTTP",
+	Short: "Starts a web server on port 8080 in a new terminal utilising the basic HTTP go pkg",
 	Long:  ``,
 	Run: func(cmd *cobra.Command, args []string) {
 		fmt.Println("Launching the web server in a new terminal window...")
@@ -38,7 +38,7 @@ var startWebCmd = &cobra.Command{
 			"start cmd /K"							will keep the terminal open after the command finishes (use /C to auto close after command finishes)
 			"toolbox.exe web startweb-server"		Is the actual command run in the new terminal
 			*/
-			terminalCommand = exec.Command("cmd", "/C", "start", "cmd", "/K", "toolbox.exe web startweb-server")
+			terminalCommand = exec.Command("cmd", "/C", "start", "cmd", "/K", "toolbox.exe web startHTTP startweb-server")
 		} else {
 			fmt.Println("This command is currently only supported on Windows.")
 			return
@@ -58,7 +58,7 @@ var startWebCmd = &cobra.Command{
 // startWebCmd represents the startWeb command
 var startWebServerCmd = &cobra.Command{
 	Use:   "startweb-server",
-	Short: "Stars a web server on port 8080 in a new ",
+	Short: "Stars a web server on port 8080 in a new terminal utilising the basic HTTP go pkg",
 	Long:  ``,
 	Run: func(cmd *cobra.Command, args []string) {
 		log := logger.GetLogger()
@@ -117,5 +117,5 @@ var startWebServerCmd = &cobra.Command{
 
 func init() {
 	WebCmd.AddCommand(startWebCmd)
-	WebCmd.AddCommand(startWebServerCmd)
+	startWebCmd.AddCommand(startWebServerCmd)
 }
